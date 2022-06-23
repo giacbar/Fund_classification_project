@@ -1,2 +1,2 @@
-# Fund_classification_project
+# Fund classification project
 ML Algorithms for investment fund classification
