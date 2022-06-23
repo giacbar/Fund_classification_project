@@ -35,12 +35,12 @@
 2. unsupervised_learning
 
 ### Packages used
-Name		Ver
-scikit-learn 	0.21.3
-pandas 		0.25.1
-numpy 		1.16.5
-pandas-ml 	0.6.1
-gensim		3.8.1
-nltk		3.4.5
-scipy		1.3.1
-matplotlib	3.1.1
+Name		Ver  
+scikit-learn 	0.21.3  
+pandas 		0.25.1  
+numpy 		1.16.5  
+pandas-ml 	0.6.1  
+gensim		3.8.1  
+nltk		3.4.5  
+scipy		1.3.1  
+matplotlib	3.1.1  
