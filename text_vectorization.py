@@ -10,13 +10,13 @@ import text_vectorizer_def as text
 import supervised_learning_def as supervised
 import numpy as np
 
-'''definisco le stopwords (parole che vengono escluse automaticamente dai testi)'''
-#nltk.download('wordnet') farlo una volta sola che viene scaricato tutto nel sistema (FORSE INUTILE PERCHè POTREBBE ESSERE QULLO IN ITALIANO)
-#nltk.download('stopwords') farlo una volta sola che viene scaricato tutto nel sistema
+'''Stopwords definition'''
+#nltk.download('wordnet') perform only once
+#nltk.download('stopwords') perform only once
 
 
 
-'''stopwords in inglese'''
+'''stopwords in english'''
 
 
 stopwords=text.load_stopwords('ita+eng')
@@ -46,10 +46,6 @@ feature_result,nfeatures_plot,names=text.vectorizer_test(vectorizer,classifier,n
 
 
 '''1.3 - reducing the number of features for text classification'''
-
-'''confronta dati per vedere se è il caso di ridurlo, vedendo quanto ogni farola è disciminante tra le categorie'''
-'''usa già preliminarmente una funzione di classificazione'''
-
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -285,11 +281,11 @@ model_bg_dmm.delete_temporary_training_data(keep_doctags_vectors=True, keep_infe
 
 
 
-'''applico la vettorizzazione finale dei testi'''
+'''applies final text vectorization'''
 X,nomi=text.text_vectorizer(normal,method='count',start=0,end=-1)
 
 
-'''creo il dataframe con i vettori numerici ottenuti dalle parole'''
+'''creates dataframe with numerical vectors from the texts'''
 X=pd.DataFrame(X,index=dfpol['ana_ticker'],columns=nomi)
 
 
