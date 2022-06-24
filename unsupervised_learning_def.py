@@ -19,8 +19,8 @@ from random import randint
 from mpl_toolkits.mplot3d import Axes3D
 
 
-#modo di scegliere i colori alternativo, non random, ma ha un numero limitato di colori
-#inutilizzato, ma i nomi dei colori possono tornare utili
+#alternative color selection method
+#not in use
 color_k2 = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w', 'aliceblue',
                'antiquewhite', 'aqua', 'aquamarine', 'azure', 'beige',  
                'bisque', 'black', 'blanchedalmond', 'blue', 'blueviolet',
@@ -59,11 +59,10 @@ color_k2 = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w', 'aliceblue',
 
 
 
-'''######## gestione dati#########'''
+'''######## Data management #########'''
 
 def lista_cluster(df):
-    """lista_cluster = lista i cui elementi sono a sua volta delle liste che 
-        contengono i nomi dei titoli, ordinati per cluster
+    """lista_cluster =  list of lists containing names, ordered by cluster
        input: -dataframe  """
     k=df["cat_descrizione"].nunique()
     df["cat_ID"]=pd.factorize(df['cat_descrizione'])[0]
@@ -79,15 +78,15 @@ def lista_cluster(df):
             vera_lista_cluster[i] = list(vera_lista_cluster[i])
     return vera_lista_cluster
 
-'''######### grafici ##########'''
+'''######### Plots ##########'''
 
 def PCA_plot(df,variables,ndim,label):
     
     '''scatter plot of the funds with the colors of their category
     
     input: dataframe
-           variabili da utilizzare (lista)
-           numero di dimensioni del grafico (2 o 3)
+           features (lista)
+           number of dimensions (2 o 3)
            label (cat_descrizione,classe,super_classe)'''
     color_k = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w', 'aliceblue',
                'antiquewhite', 'aqua', 'aquamarine', 'azure', 'beige',  
@@ -154,10 +153,10 @@ def PCA_plot(df,variables,ndim,label):
         ax.scatter(pcas.iloc[:,0],pcas.iloc[:,1], pcas.iloc[:,2],s=10,c=color)
         plt.show()
 
-'''######### funzioni di clustering######### '''
+'''#########  Clustering functions ######### '''
 
 def hierarchical_clustering(completedataframe,columns,excelname,k,method, metric, plot,ndim):
-    """runs the hierarchical clustering algorithm for the dataframe.
+    """Runs the hierarchical clustering algorithm for the dataframe.
        INPUTS: -dataframe
                -columns on which to cluster observations
                -method of computing distance between clusters (complete, single..)
@@ -334,18 +333,15 @@ def multiple_kmeans(df,variables,iterations,k):
 
 def combination_search(lista_cluster,tutti_titoli):
     """
-    funzione che prende in input una lista i cui elementi sono le composizioni
-    dei cluster costruiti eseguendo l'algoritmo più volte utilizzando 
-    metodologie diverse (su periodi diversi o usando metriche diverse,....) e 
-    trova le combinazione degli elementi che si ripetono ogni volta
+    Function that takes as input a list whose elemtns are the cluster compositions
+    built using the algorithms multiple times using different methods (different periods metrics..)
+    and finds the combinations of repeating elements
     
-     input: lista i cui elementi sono le liste dei cluster
-            lista contenenti i nomi di tutti i titoli considerati
+     input: list of lists of clusters
+            list of all fund names
 
-    output: lista contenente le combinazioni di titoli che si ripetono
-            ogni volta
-            matrice A che sintetizza le combinazioni dei cluster ottenuti ad
-            ogni esecuzione dell'algoritmo
+    output: list of fund combinations
+            matrix A for summarising the cluster combinations
     """
     
     color_k = []
