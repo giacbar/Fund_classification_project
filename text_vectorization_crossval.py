@@ -4,7 +4,7 @@ Created on Fri Jan 10 09:48:06 2020
 
 @author: python
 """
-#PRENDE IN INPUT df_pol da data_management.py
+#Takes as input df_pol from data_management.py
 #os.chdir("\\\\salaanalisisrv\\ufficio_studi\\python\\Cluster\\barilaro\\python") #analisti1
 
 import os 
@@ -20,7 +20,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-'''definisco le stopwords (parole che vengono escluse automaticamente dai testi)'''
+'''Defines stopwords (words to be excluded from the analysis)'''
 
 #import nltk
 #nltk.download('wordnet') #farlo una volta sola che viene scaricato tutto nel sistema (FORSE INUTILE PERCHè POTREBBE ESSERE QULLO IN ITALIANO)
@@ -28,38 +28,38 @@ warnings.filterwarnings("ignore")
 #nltk.download('punkt')
 
 
-'''stopwords in inglese e italiano'''
-stopwords=text.load_stopwords('ita+eng') #stopwords = parole non significative per l'algoritmo (es. articoli, congiunzioni ecc.)
+'''stopwords in english and italian'''
+stopwords=text.load_stopwords('ita+eng') 
 
 
-'''decido quale variabili testuali usare'''
+'''selects which variables to be used'''
 df=df_mixed.copy()
 variables_pol='testo_intero'
 scoring='accuracy'
 print('using {0} score'.format(scoring))
 
-df[variables_pol]=df['testo_intero'] #seleziono quale testo utilizzare
-label='cat_descrizione' #definisco quale livello gerarchico utilizzare 
+df[variables_pol]=df['testo_intero'] #selects the text
+label='cat_descrizione' #defines the hierarchical class to be used
 
-'''normalizzo le features testuali'''
-normal=text.text_normalizer(df[variables_pol],stopwords) #normalizzo i testi, rimuovendo anche le stopwords
+'''textual features normalization'''
+normal=text.text_normalizer(df[variables_pol],stopwords) 
 df[variables_pol]=normal
 
-'''separo train e test set'''
+'''splits train and test set'''
 train_size=0.9
 X_train,y_train,X_test,y_test=supervised.prepare_inputs(df,anagrafica,variables_pol,label,train_size,'stratified',scaling=False,artificial=False)
 
 
 
-'''1 - valutazione BAG OF WORDS: confronto tra count vectorizer e tfidf vectorizer'''
+'''1 - BAG OF WORDS: comparison between count vectorizer and tfidf vectorizer'''
 
-ngram_range=(1,1) #parametro per utilizzare i bigrammi (1,2),trigrammi (1,3), (1,1) è l'unigramma di default
+ngram_range=(1,1) # bigram (1,2) and trigram (1,3) paramater, unigram (11) is the default 
 
 '''1.1 - Count vectorizer'''
 
-vectorizer = text.CountVectorizer(ngram_range=ngram_range,analyzer='word') #definisco il tipo di vectorizer
-classifier = supervised.LogisticRegression() #definisco il classifier da utilizzare
-n_features = ['none'] #definisco il range di feature da utilizzare ('none' le utilizza tutte insieme)
+vectorizer = text.CountVectorizer(ngram_range=ngram_range,analyzer='word') #defines the vectorized type
+classifier = supervised.LogisticRegression() #defines the classifier to be used 
+n_features = ['none'] #defines the range of features to be considered ('none' uses all of them)
 
 print('vectorizer: count\n')
 feature_result,nfeatures_plot,names=text.vectorizer_test_crossval(vectorizer,classifier,n_features,X_train,y_train[label],scoring=scoring)
@@ -76,9 +76,7 @@ feature_result,nfeatures_plot,names=text.vectorizer_test_crossval(vectorizer,cla
 
 '''1.3 - reducing the number of features for text classification'''
 
-'''confronta dati per vedere se è il caso di ridurlo, vedendo quanto ogni parola è disciminante tra le categorie'''
-'''usa già preliminarmente una funzione di classificazione'''
-
+''' Compares data to see if reduction is needed by looking at how discriminant each word is'''
 
 n_features = np.arange(100,1000,100) #intervalli di numero di features (ordinate per chi2 score o frequenza) da utilizzare
 vectorizer = text.CountVectorizer(ngram_range=ngram_range,analyzer='word') #selezionando il modello che presenta un accuratezza maggiore
@@ -101,7 +99,7 @@ text.plot_comparison(nfeatures_plot.nfeatures,nfeatures_plot.validation_accuracy
 
 
 
-'''2 - valutazione Doc2vec'''
+'''2 - Doc2vec evaluation'''
 
 vectorization = text.labelize(X_train, 'all')  #vettorizzazione, input necessario per doc2vec
 
@@ -110,7 +108,7 @@ vectorization = text.labelize(X_train, 'all')  #vettorizzazione, input necessari
 
 print('DOC2VEC\n')
 
-'''definisco il classifier e i parametri per doc2vec'''
+'''Define hte classifier and doc2vec parameters'''
 classifier= supervised.LogisticRegression()
 
 alpha_drop=0.0005
@@ -232,34 +230,34 @@ text.combining_doc2vec_models_crossval(model_ug_dbow,model_ug_dmm,classifier,X_t
 
 
 
-'''4 - Applicazione metodologia a scelta: seleziono la vettorizzazione risultata piu performante'''
-'''4.1 - indico nome del dataframe da generare e le sue variabili su cui avverrà la classificazione'''
+'''4 - Application of the methodology: selects the best performing vectorization'''
+'''4.1 - Picks the name of the dataframe to be generated and the variables on which to make the classification'''
 
 
-'''decido quale variabili testuali usare'''
+'''Choose which variables to use'''
 
 
 '''alternative:
 vectorizer = text.TfidfVectorizer(ngram_range=ngram_range,analyzer='word')
-vectorizer = text.CountVectorizer(ngram_range=ngram_range,analyzer='word') #selezionando il modello che presenta un accuratezza maggiore
+vectorizer = text.CountVectorizer(ngram_range=ngram_range,analyzer='word') # Selecting the model with greater accuracy
 '''
 
 ngram_range=(1,1)
 n_features_to_select=100
-vectorizer = text.CountVectorizer(ngram_range=ngram_range,analyzer='word') #selezionando il modello che presenta un accuratezza maggiore
+vectorizer = text.CountVectorizer(ngram_range=ngram_range,analyzer='word') # Selecting the model with greater accuracy
 
 #df_mixed,variables_mixed,variables_pol=text.select_best_chi2_features(df,variables_pol,variables_return,anagrafica,label,vectorizer,'count',n_features_to_select)
 
 df_mixed,variables_mixed,variables_pol=text.select_best_chi2_features(df,variables_pol,variables_return,anagrafica,vectorizer,label,n_features_to_select)
 
 
-'''5 - scelta tra doc2vec'''
+'''5 - Choice between doc2vec'''
 
 alpha_drop=0.0005
 model=Doc2Vec(dm=0, vector_size=100,negative=15, min_count=1, alpha=0.05, min_alpha=0.01,seed=1)
 #model = Doc2Vec(dm=1, dm_mean=1, size=100, negative=15, min_count=1, alpha=0.05, min_alpha=0.01)
 
-'''5.1 - selezione vettori'''
+'''5.1 - Vector selection'''
 
 #df_mixed,variables_pol=text.doc2vec_get_vectors(model,df,variables_pol,variables_return,anagrafica,alpha_drop)
 
