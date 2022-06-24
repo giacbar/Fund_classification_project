@@ -379,14 +379,12 @@ def combination_search(lista_cluster,tutti_titoli):
 
 def cluster_intersection(lista_cluster,tutti_titoli):
     """
-    outputta solo una parte della precedente funzione
+    outputs only a part of the function above
     
-     input: lista i cui elementi sono le liste dei cluster
-            lista contenenti i nomi di tutti i titoli considerati
+     input: list of lists of clusters
+            list of names of funds considered
 
-    output: 
-            matrice A che sintetizza le combinazioni dei cluster ottenuti ad
-            ogni esecuzione dell'algoritmo
+    output: matrix A for summarising the cluster combinations
     """
     
     color_k = []
@@ -479,14 +477,13 @@ def from_clusters_combinations_to_dataframe(combination, clusterings):
 
 def two_step(D,titles,k1,k2):
     """
-    funzione che effettua la procedura two step per trovare i clusters, prima hierarchical poi kmeans
+    function for the 2 step clustering method, first hierarchical then kmeans
     
-     input: DataFrame dei rendimenti
-            numero di cluster che vogliamo ottenere nel primo step
-            lista dei codici dei titoli
-            numero tra [0-100] che corrisponde alla riduzione percentuale 
-            dell'SSE necessaria per selezionare il numero ottimale di cluster
-            che vogliamo ottenere nel secondo step
+     input: yields dataFrame 
+            number of cluster to be obtained in step 1numero di cluster che vogliamo ottenere nel primo step
+            list of fund names
+            number between 0 and 100 corresponding to the percentile reduction of the SSE needed
+            for the optimal cluster number for step 2
     """
     z1 =hierarchical_clustering(D,titles,"clust_hier.xlsx",k1,method="complete",metric="euclidean", plot=False)[2]
     z2 = [0.0]*k1
@@ -517,10 +514,10 @@ def two_step(D,titles,k1,k2):
     return z2
 
 
-'''########## funzioni per punteggi############'''
+'''########## Scoring functions ############'''
 
 def checkEqual(iterator):
-    """funzionale per checkList"""
+    """Function for checklist below"""
     iterator = iter(iterator)
     try:
         first = next(iterator)
@@ -529,7 +526,7 @@ def checkEqual(iterator):
     return all(first == rest for rest in iterator)
 
 def checkList(cluster_list):
-    """controlla il numero di cluster con tutti i fondi della stessa categoria"""
+    """Checks the number of clusters with all the funds of the same class"""
     vec=[0]*len(cluster_list)
     for i in range(len(cluster_list)):
         vec[i]=checkEqual(cluster_list[i])
@@ -539,9 +536,9 @@ def checkList(cluster_list):
     
     
 def frequency_scores(lista, percentage):
-    """INPUT: Lista dei cluster, livello di percentuale desiderato per fondi della stessa categoria in un cluster
-       OUTPUT: True: il cluster ha >percentuale di fondi della stessa cat.
-               False: il cluster non ha..................................."""
+    """INPUT: list of clusters, desired percentage of funds of the same class in each cluster
+       OUTPUT: True: cluster has >% of funds of the same class
+               False: cluster doesn't..................................."""
     results=[]
     for i in range(len(lista)):
         counter=Counter(lista[i])
@@ -555,7 +552,7 @@ def frequency_scores(lista, percentage):
 
 
 def recursive_len(item):
-    """ funzione accessoria per purity"""
+    """ Function for purity below"""
     if type(item) == list:
         return sum(recursive_len(subitem) for subitem in item)
     else:
@@ -579,8 +576,8 @@ def purity(lista):
     return results
 
 def silhouette(lista,df,titles):
-    """INPUT: Lista dei clusterings, df, colonne
-       OUTPUT: lista con silhouette scores globali per ogni clustering"""
+    """INPUT: clusterings lists, df, columns
+       OUTPUT: list of silhoutte scores global and for each clustering"""
     
     punteggi=[0]*len(lista)
     for i in range(len(lista)):
