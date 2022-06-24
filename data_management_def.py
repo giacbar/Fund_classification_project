@@ -14,7 +14,7 @@ from collections import Counter
 import seaborn as sns
 from langdetect import detect
 
-'''############### FUNZIONI CARICAMENTO DATI SPECIFICHE ################'''
+'''############### DATA LOADING FUNCTIONS ################'''
 
 def import_excel(name,path):
     """imports the xlxs file
@@ -126,7 +126,7 @@ def category_selection(wordsin,wordsout,dataframe,column):
     final.index = range(len(final))
     return final
 
-'''############ FUNZIONI CONTEGGIO FONDI-CAT/CLASSI/SUP-CLASSI ###########'''
+'''############ CLASS COUNTING FUNCTIONS ###########'''
 
 def category_count(df,category):
     """counts the number of funds in each category(class) in the dataframe
@@ -145,13 +145,11 @@ def category_count(df,category):
     return ordine_categorie
 
 def class_size_threshold(df,label,X,keep):
-    '''seleziono solo le categorie che hanno almeno X fondi,
-        le categorie scartate le metto in una unica di chiusura
+    '''selects on the classes that have at least X funds, the omitted classes are put in a single one together
         input: dataframe
-               label (categoria)
-               X (threshold numerosità cateogrie)
-               keep: se True fa confluire le categorie con bassa numerosità in 
-                     una categoria nulla'''
+               label (class)
+               X (threshold )
+               keep: if true it puts all the low count classes into a single one'''
     
     num_cat=category_count(df,label)
     num_cat=num_cat[num_cat['quantity']>=X]
@@ -172,13 +170,11 @@ def class_size_threshold(df,label,X,keep):
     return df
 
 def class_size_threshold_all_labels(df,X,keep):
-    '''seleziono solo le categorie che hanno almeno X fondi,
-        le categorie scartate le metto in una unica di chiusura
+    '''selects on the classes that have at least X funds, the omitted classes are put in a single one together
         input: dataframe
-               label (categoria)
-               X (threshold numerosità cateogrie)
-               keep: se True fa confluire le categorie con bassa numerosità in 
-                     una categoria nulla'''
+               label (class)
+               X (threshold )
+               keep: if true it puts all the low count classes into a single one'''
     
     num_cat=category_count(df,'cat_descrizione')
     num_cat=num_cat[num_cat['quantity']>=X]
@@ -220,14 +216,14 @@ def seleziona_date_partenza(df,data):
     variables=pd.DataFrame(df.columns,index=df.columns)
     variables=list(variables[data:].index)
     
-    return variables #restituisce la lista di colonne dalla data specificata in poi
+    return variables #returns the list of columns from the specified date onwards 
 
 def minimum_time_series_length(df,variables,threshold):
     
     df=df.dropna(subset=variables,thresh=int(len(variables)*threshold))
     df.index=range(len(df))
     
-    return df #restituisce df già pulito delle serie storiche troppo corte
+    return df #returns dataframe cleaned from the short time series 
 
 def seleziona_gerarchia(df,ngerarchia):
     if(ngerarchia==1):
@@ -243,10 +239,10 @@ def seleziona_gerarchia(df,ngerarchia):
     df=df.drop('gerarchia',axis=1)
     return df
 
-'''######### GESTIONE OUTLIERS ##########'''
+'''######### OUTLIER MANAGEMENT ##########'''
 
 def delete_out_of_IQR(df,variables, yes):
-    '''Elimina righe con elementi al di fuori dell'intervallo interquantile'''
+    '''Deletes rows with elements outside interquantile interval'''
     if (yes==True):
         Q1 = df[variables].quantile(0.25)
         Q3 = df[variables].quantile(0.75)
@@ -254,7 +250,7 @@ def delete_out_of_IQR(df,variables, yes):
         df = df[~((df[variables] < (Q1 - 1.5 * IQR)) |(df[variables] > (Q3 + 1.5 * IQR))).any(axis=1)]
     return df
 
-'''########### GRAFICI ###########'''
+'''########### PLOTS ###########'''
 
 def class_histogram(df,label):
     
@@ -321,7 +317,7 @@ def show_nans(df,variables):
     fig=sns.heatmap(df[variables].isnull(), cbar=False)
     plt.show(fig)
 
-'''########### GESTIONE TESTI ############'''
+'''########### TEXT MANAGEMENT ############'''
 
 
 
