@@ -6,17 +6,17 @@ Created on Fri Dec 20 17:52:04 2019
 """
 
 
-'''essential modules'''
+'''Essential modules'''
 import os 
 import pandas as pd
 
-"""seleziono la directory desiderata per caricare le librerie"""
+"""Selects the directory containing the libraries"""
 os.chdir('E:\python') #chiavetta
 #os.chdir("C:\\Users\\Windows 10\\Desktop\\Stage\\python") #mio portatile
 #os.chdir("\\\\salaanalisisrv\\ufficio_studi\\python\\Cluster\\barilaro\\python") #analisti1
 #os.chdir('\\\\salaanalisisrv\\ufficio_studi\\python\\Cluster\\Giulio\\def') #fonte libreria
 
-'''modules for data and text'''
+'''Modules for data and text'''
 import data_management_def as data
 import warnings
 warnings.filterwarnings("ignore")
@@ -25,14 +25,14 @@ warnings.filterwarnings("ignore")
 
 
 
-'''1 - INIZIALIZZAZIONE DEI DATI'''
+'''1 - DATA INITIALIZATION'''
 
 
-'''1.1 - Carico il dataframe con tutti i dati'''
+'''1.1 - Loads the dataframe with all the data'''
 df_mixed=pd.read_excel('dataframe_iniziale.xlsx',index=False)
 
 
-'''1.2 -indico le colonne di anagrafica  e quelle delle variabili (features) da utilizzare'''
+'''1.2 - Selects anagraphic and features columns to be used'''
 
 variables_return=data.seleziona_date_partenza(df_mixed,'2000-01-31') #taglio l'elenco delle colonne dei rendimenti da una certa data in poi 
 
@@ -41,13 +41,13 @@ variables_pol=['pol_testo','pol_finalita'] #selezione colonne con campi testuali
 anagrafica=["ana_name","ana_ticker","cat_descrizione","super_classe","classe","gerarchia"] #seleziono colonne con campi anagrafici
 
 
-'''1.3 - Divido il dataframe in quello dei rendimenti e quello dei documenti'''
+'''1.3 - Divides initial dataframe into yields and documents dataframes'''
 
 df_return = df_mixed[anagrafica+variables_return] #datafrme rendimenti
 df_pol = df_mixed[anagrafica+variables_pol] #dataframe testi
 
 
-'''1.4 - Seleziono gerarchia'''
+'''1.4 - Selects hierarchy'''
 
 gerarchia=1 #se inserisco gerarchia superiore a 1, seleziona anche le precedenti (livello minimo di gerarichia)
 
@@ -58,17 +58,17 @@ df_return=data.seleziona_gerarchia(df_return,gerarchia) #elimino dall'elenco di 
 anagrafica=["ana_name","ana_ticker","cat_descrizione","super_classe","classe"] 
 
 
-#########   FINE PREPARAZIONE INPUT   ############
+#########   END OF INPUT PREPARATION   ############
 
 
-'''2 - ANALISI ESPLORATIVA DEI DATI'''
+'''2 - DATA EXPLORATIVE ANALYSIS'''
 
 
-'''2.1 - Visualizza graficamente i rendimenti per capire dove mancano i dati'''
+'''2.1 - Show the yields via plot to see where the missing data is'''
 data.show_nans(df_return,variables_return)
 
 
-'''3.3 - plot della serie storica dei rendimenti, medie di super_classe'''
+'''3.3 - Time series plot of yields'''
 grouped=pd.DataFrame(df_mixed.groupby('super_classe')[variables_return].mean())
 trasposta=grouped.transpose()
 ax = trasposta.plot(figsize=(13,13),ylim=(-0.21,0.21),grid=True,fontsize=13)
@@ -77,71 +77,69 @@ ax.set_ylabel("Returns")
 
 
 
-'''2.2 - Verifica quanto è la percentuale di dati non mancanti per ogni colonna del dataframe''' 
+'''2.2 - Verify the % of non-missing data for each dataframe column''' 
 percentuale_minima=0.5
 data.no_NaN_rows(df_return[variables_return],percentuale_minima)
 
 
-'''2.3 - Seleziona sottoinsieme del dataframe iniziale a partire da una data (riduco colonne)'''
+'''2.3 - Selects subset of initial dataframe from a defined date'''
 variables_return=data.seleziona_date_partenza(df_return,'2016-01-31') #riduco il time frame di analisi a quello con abbastanza dati
 df_return=df_return[anagrafica+variables_return]
 
 
-'''2.4 - Seleziono solo le righe che hanno almneno un certa percentuale di dati non mancanti'''
+'''2.4 - Selects only rows with a certain % of non-missing data'''
 percentuale_minima=0.5
 df_return = data.minimum_time_series_length(df_return,variables_return,percentuale_minima) #tolgo i fondi che hanno troppi pochi dati
 
 
-'''2.5 - Istogramma della numerosità delle categorie nei dataframe'''
+'''2.5 - Histogram of the classes'''
 label='classe' #definisco quale livello gerarchico del db da utilizzare (specificare nome del campo): categoria, classe o superclasse
 data.class_histogram(df_pol,label)
 data.class_histogram(df_return,label)
 
 
-'''2.6 - Boxplot per rendimenti'''
+'''2.6 - Yields boxplot'''
 data.returns_boxplot(df_return,variables_return,'2016-01-31','2016-12-31')
 data.returns_boxplot(df_return,variables_return,'2017-01-31','2017-12-31')
 data.returns_boxplot(df_return,variables_return,'2018-01-31','2018-12-31')
 data.returns_boxplot(df_return,variables_return,'2017-12-31','2018-12-31')
 
 
-'''2.7 - Elimino i dati esterni all'intervallo interquantile (per togliere outliers)''' 
+'''2.7 - Removes data outside the interquantile interval (outlier removal)''' 
 df_return=data.delete_out_of_IQR(df_return,variables_return,yes=False) #yes=True toglie gli outliers
 #data.show_nans(df_return,variables_return)
 
 
-'''2.8 - Heatmap che evidenzia le correlazioni tra i rendimenti nelle varie date'''
+'''2.8 - Heatmap for yield correlations by date'''
 correlazione_minima=0.5 # fa vedere correlazioni con valore pari o superiore
 #correlazione calcolata non tra cat ma tra diverse date
 #data.heatmap(df_return,variables_return,correlazione_minima)
 
 
-'''2.9 - Scatterplot su due colonne'''
+'''2.9 - Scatterplot on two columns'''
 data.scatterplot_columns(df_return,'2016-06-30','2016-12-31') #scatterplot con date selezionate a piacere
 
 
-'''2.10 - Pairplot sull'intero dataframe di rendimenti'''
+'''2.10 - Pairplot of the yields'''
 data.pairplot(df_return,variables_return,'no') #con no non printa, particolarmente pesante 
 
 
-'''2.11 - histograms, con bins = 20 (larghezza dei rettangoli'''
+'''2.11 - Histograms, with bins = 20 '''
 data.histograms_columns(df_return,variables_return,20) 
 
 
-'''2. 12 - distribuzione dei testi tra le lingue'''
-'''eseguire prima della traduzione'''
-#faccio istogramma con distribuzione lingue e aggiungo colonna con specificazione
-#della lingua (it, en, de...)
+'''2. 12 - Language distribution of the documents'''
+'''Execute before translation'''
+
 df_pol=data.controllo_testi_stranieri(df_pol) 
-#creo variabile unica per il testo
 df_pol['testo_intero']=df_pol['pol_testo']+df_pol['pol_finalita']+df_pol['ana_name'] 
 variables_pol=['testo_intero']
 
-'''2.13 - seleziono solo fondi con testo in italiano o seleziono anche le traduzioni di google'''
-'''se modalità=traduci aggiunge anche i testi stranieri tradotti, se =solo italiani lascia solo quelli in italiano'''
+'''2.13 - Selects only funds with italian documents or translated to italian'''
+'''If modalità=traduci it adds the translated texts as well, if =solo italiani it only keeps the italian ones'''
 
 modalità='traduci' 
-file_traduzioni='fondi_tradotti_in_italiano.xlsx' #file con db documenti tradotti
+file_traduzioni='fondi_tradotti_in_italiano.xlsx' #dataset with translated text
 
 df_pol=data.traduci_testi_stranieri(df_pol,modalità,file_traduzioni,gerarchia)
 
@@ -150,22 +148,20 @@ df_pol=data.traduci_testi_stranieri(df_pol,modalità,file_traduzioni,gerarchia)
 
 
 
-'''3 - DATAFRAME FINALI'''
+'''3 - FINAL DATAFRAMES'''
 
 
 
-'''3.1 - dataframe con parole e rendimenti'''
+'''3.1 - Words and yields dataframe'''
 df_mixed=df_pol.merge(df_return,left_on=anagrafica,right_on=anagrafica)
 variables_mixed=variables_return+variables_pol
 
 
-'''3.2 - Opzionale: seleziono solo le categorie che hanno almeno X fondi'''
-'''le categorie scartate le metto inuna unica di chiusura'''
-'''valutare se l'accorpamento ex post non si apiù efficace, considerando il fatto 
-che l'algoritmo valuta la vicinanza e una categoria con molta vairanza ha poche 
-chance di essere quindi scelta'''
-keep=True #se inserire o meno i fondi insufficientemente numeroso in una categoria nulla (esempio=Varie)
-x=2 #numero minimo di fondi appartenenti alla categorie
+'''3.2 - Optional: selects only classes with X funds'''
+'''The smaller classes are put into a single one'''
+
+keep=True #if true it puts the smaller classes into a closure ones 
+x=2 #smallest allowed number of funds for each class
 df_mixed=data.class_size_threshold_all_labels(df_mixed,x,keep)
 #df_pol=data.class_size_threshold_all_labels(df_pol,x,keep)
 #df_return=data.class_size_threshold_all_labels(df_return,x,keep) 
