@@ -6,7 +6,7 @@ Created on Mon Dec  9 09:01:33 2019
 @author: python
 """
 
-'''modules for text'''
+'''Modules for text'''
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -19,7 +19,7 @@ from bs4 import BeautifulSoup
 import re, unicodedata
 from sklearn.model_selection import cross_val_score
 
-# per eventuale inserimento altre lingue
+# Modules for other languages
 #from nltk import word_tokenize, sent_tokenize,bigrams
 #from nltk.stem.snowball import ItalianStemmer
 #from nltk.stem.lancaster import LancasterStemmer
@@ -43,7 +43,7 @@ from gensim.models.doc2vec import LabeledSentence
 import numpy as np
 
 def load_stopwords(language):
-    '''Carica stopword in base a lingua selezionata'''
+    '''Loads stopwords using the selected language'''
     from nltk.corpus import stopwords
 
     if(language=='ita'):
@@ -64,8 +64,8 @@ def load_stopwords(language):
 
 def prepare_data_for_vectorization(df,normaldf,label,testvalsize,testsize,shuffle_method):
     
-    '''needs a normalized text df
-    split in 3 parti: training, validation e test di composizione fissa'''
+    '''Needs a normalized text df
+    split in 3 parts: training, validation and test'''
     
     normaldf2=pd.DataFrame(normaldf,index=df.index)
     df2=df.merge(normaldf2, left_on=df.index,right_on=normaldf2.index)
@@ -74,7 +74,7 @@ def prepare_data_for_vectorization(df,normaldf,label,testvalsize,testsize,shuffl
     X=df_to_split[0]
     y=df_to_split[label]
     
-    if(shuffle_method=='stratified'): #cerca di dividere equamente le categorie nei due set
+    if(shuffle_method=='stratified'): #tries to split the classes equally between the two parts
         
         X_train,X_test_val,y_train,y_test_val = supervised.train_test_split(X, y, test_size=testvalsize,random_state=12)
 
@@ -87,11 +87,11 @@ def prepare_data_for_vectorization(df,normaldf,label,testvalsize,testsize,shuffl
             y_val, y_test = y.iloc[val_index,], y.iloc[test_index,]
         
 
-    elif(shuffle_method==None): #divide senza considerare categorie
+    elif(shuffle_method==None): #splits without considering the classes
         X_train,X_test_val,y_train,y_test_val = supervised.train_test_split(X, y, test_size=testvalsize,random_state=12)
         X_val, X_test, y_val, y_test = supervised.train_test_split(X_test_val, y_test_val, test_size=testsize,random_state=12)
 
-    # print numero categorie
+    # print class number
     print('numero categorie nel train set:{0}'.format(y_train.nunique()))
     print('numero categorie nel validation set:{0}'.format(y_val.nunique()))
     print('numero categorie nel test set:{0}'.format(y_test.nunique()))
@@ -101,7 +101,7 @@ def prepare_data_for_vectorization(df,normaldf,label,testvalsize,testsize,shuffl
 
 def prepare_data_for_vectorization_crossval(df,normaldf,label,testsize,shuffle_method=None):
     '''needs a normalized text df
-    split in 2 parti: training e test di composizione fissa, validation è compiuta sul training set'''
+    split in 3 parts: training e test, validation is performed on the training set'''
     
     normaldf2=pd.DataFrame(normaldf,index=df.index)
     df2=df.merge(normaldf2, left_on=df.index,right_on=normaldf2.index)
@@ -110,7 +110,7 @@ def prepare_data_for_vectorization_crossval(df,normaldf,label,testsize,shuffle_m
     X=df_to_split[0]
     y=df_to_split[label]
     
-    if(shuffle_method=='stratified'):#cerca di dividere equamente le categorie nei due set
+    if(shuffle_method=='stratified'):#tries to split the classes equally between the two parts
         
         sss = StratifiedShuffleSplit(n_splits=5, test_size=testsize, random_state=1)
 
@@ -120,10 +120,10 @@ def prepare_data_for_vectorization_crossval(df,normaldf,label,testsize,shuffle_m
             y_train, y_test = y.iloc[val_index,], y.iloc[test_index,]
         
 
-    elif(shuffle_method==None):#divide senza considerare categorie
+    elif(shuffle_method==None): #splits without considering the classes
         X_train,X_test,y_train,y_test = supervised.train_test_split(X, y, test_size=testsize,random_state=12)
 
-    # print numero categorie
+    # print class number
     print('numero categorie nel train set:{0}'.format(y_train.nunique()))
     print('numero categorie nel test set:{0}\n'.format(y_test.nunique()))
 
@@ -131,17 +131,17 @@ def prepare_data_for_vectorization_crossval(df,normaldf,label,testsize,shuffle_m
     return  X_train, y_train, X_test, y_test
 
 def vectorizer_test(vectorizer,classifier,n_features,stopwords,X_train,y_train,X_val,y_val):
-    ''' Versione senza crossvalidation
+    ''' Version without crossvalidation
     INPUT:
-        vectorizer: funzione di vettorizzazione
-        classifier: modello di classificazione
-        n_features: lista con intervalli per iterazione numero features e test di accurezza, con lista vuota non fai iterazione ma prende tutti
-        stopword= lista di stopwords
-        Training e validation set
+        vectorizer:  vectorizations function
+        classifier: classification model
+        n_features: list with intervals for iteration of number of features and accuracy test, with empty list it takes all without multiple iterations
+        stopword= stopwords list
+        Training and validation set
     OUTPUT:
-        feature_result = risultato calcolo accuracy
-        nfeatures_plot = feature_result in df per grafico
-        names = elenco features
+        feature_result = accuracy results
+        nfeatures_plot = feature_result in df for plot
+        names =  features list
         '''
     feature_result = nfeature_accuracy_checker(vectorizer, classifier,n_features, stopwords,X_train, y_train, X_val, y_val) #richiama la funzione successiva
     nfeatures_plot = pd.DataFrame(feature_result,columns=['validation_score'])
@@ -185,15 +185,15 @@ def accuracy_summary(pipeline, X_train, y_train, X_test, y_test):
 def vectorizer_test_crossval(vectorizer,classifier,n_features,X_train,y_train,scoring):
     ''' Versione con crossvalidation
     INPUT:
-        vectorizer: funzione di vettorizzazione
-        classifier: modello di classificazione
-        n_features: lista con intervalli per iterazione numero features e test di accurezza, con lista vuota non fai iterazione ma prende tutti
-        stopword= lista di stopwords
-        Training set
+     	vectorizer:  vectorizations function
+        classifier: classification model
+        n_features: list with intervals for iteration of number of features and accuracy test, with empty list it takes all without multiple iterations
+        stopword= stopwords list
+        Training  set
     OUTPUT:
-        feature_result = risultato calcolo accuracy
-        nfeatures_plot = feature_result in df per grafico
-        names = elenco features
+        feature_result = accuracy results
+        nfeatures_plot = feature_result in df for plot
+        names =  features list
         '''
 		
     feature_result = nfeature_accuracy_checker_crossval(vectorizer, classifier,n_features, X_train, y_train,scoring)
@@ -236,16 +236,16 @@ def accuracy_summary_crossval(pipeline, X_train, y_train,scoring):
     return accuracy,accuracy_mean
 
 def chi2_feature_comparison(X_train,y_train,X_val,y_val,n_features,  vectorizer, classifier):
-    '''Feature scoring attraverso il chi-quadro: senza crossvalidation
+    '''Feature scoring with chi square: without crossvalidation
     INPUT:
-        vectorizer: funzione di vettorizzazione
-        classifier: modello di classificazione
-        n_features: lista con intervalli per iterazione numero features e test di accurezza, con lista vuota non fai iterazione ma prende tutti
-        stop_word= lista di stopwords
-        Training e validation set
+     	vectorizer:  vectorization function
+        classifier: classification model
+        n_features: list with intervals for iteration of number of features and accuracy test, with empty list it takes all without multiple iterations
+        stopword= stopwords list
+        Training and validation set
     OUTPUT:
-        ch2_result = risultato calcolo chi-quadro
-        chi2_loops = risultati in lista per grafico
+        ch2_result = chi square result
+        chi2_loops = results in a list for plotting
     '''
     X_train_chi2 = vectorizer.fit_transform(X_train)
     X_val_chi2=vectorizer.transform(X_val)
@@ -277,17 +277,17 @@ def chi2_feature_comparison(X_train,y_train,X_val,y_val,n_features,  vectorizer,
     return ch2_result, chi2_loops
 
 def chi2_feature_comparison_crossval(X_train,y_train,n_features, vectorizer, classifier,scoring):
-    '''Feature scoring attraverso il chi-quadro: con crossvalidation
+    '''Feature scoring with chi square: with crossvalidation
     INPUT:
-        vectorizer: funzione di vettorizzazione
-        classifier: modello di classificazione
-        n_features: lista con intervalli per iterazione numero features e test di accurezza, con lista vuota non fai iterazione ma prende tutti
-        stop_word= lista di stopwords
+     	vectorizer:  vectorization function
+        classifier: classification model
+        n_features: list with intervals for iteration of number of features and accuracy test, with empty list it takes all without multiple iterations
+        stopword= stopwords list
         Training set
     OUTPUT:
-        ch2_result = risultato calcolo chi-quadro
-        chi2_loops = risultati in lista per grafico
-    '''
+        ch2_result = chi square result
+        chi2_loops = results in a list for plotting
+'''
     
     X_train_chi2 = vectorizer.fit_transform(X_train)
 
@@ -340,18 +340,18 @@ def plot_comparison(nfeatures,nfeatures_accuracy,ch2_result,features_range,scori
     plt.legend()
 
 def select_best_chi2_features_OLD(df,variables_pol,variables_return,anagrafica,label,vectorizer,vectorization_method, first_n_features_to_take):
-    ''' Selezione delle features in base al chi-quadro : NB no separazione training e validation
+    ''' Feature selection with chi-square, no separation between training and validation
     INPUT:
         DataFrame
-        anagrafica: lista colonne dell'anagrafica
-        label= su quale campo effettuare la selezione as string
-        vectorizer: funzione di vettorizzazione (modello)
-        vectorization_method: count o tfidf, metodo di vettorizzazione
-        first_n_features: numero di features da seleziore
-        normalized_texts = testi già normalizzati e pronti per analisi
+        anagrafica: list of anagraphic columns
+        label= field on which to perform the selection as string
+        vectorizer: vectorization function (model)
+        vectorization_method: count or tfidf, vectorization method
+        first_n_features: number of features to select
+        normalized_texts = normalized texts ready for analysis
     OUTPUT:
-        DataFrame già ridotto dalle variabili non significative
-        variables: lista features pulita
+        DataFrame without non-signigficative variables
+        variables: clean feature list 
     '''
     
     X=df[variables_pol]
@@ -410,14 +410,14 @@ def select_best_chi2_features(df,variables_pol,variables_return,anagrafica,vecto
 
 
 def text_normalizer(texts,stopwords):
-    '''prende i kiid e applica il metodo bag of words restituendo il dataframe 
-    con distribuzione di frequenza delle parole
-    INPUT: lista di testi
-           lista di stopwords
-           metodo di vettorizzazione: count o tfidf
-           indice di inizio e indice di fine
-    OUTPUT: matrice di features (parole vettorizzate)
-            lista di parole vettorizzate'''
+    '''selects kiid and uses bag of words method for word frequency distribution
+    
+    INPUT: texts list
+           stopwords list
+           vectorization method: count or tfidf
+           start and end index
+    OUTPUT: feature matrix (vectorized words)
+            vectorized words list'''
     
     texts_list=[0]*len(texts)
         
@@ -502,7 +502,7 @@ def remove_short_words(words):
 
 def stem_words(words):
     """Stems words in list of tokenized words"""
-    #selezione lingua e algoritmo
+    #language and algorithm selection
     stemmer = SnowballStemmer('italian')
     #stemmer = SnowballStemmer('english')
     #stemmer = ItalianStemmer()
@@ -533,7 +533,7 @@ def fix_text(text):
 
 def google_translation(lista):
     '''
-    input:lista di liste di stringhe di testo da tradurre pezzo a pezzo
+    input: list of all strings to translate
     '''
           
     lista.index=range(len(lista))
@@ -558,7 +558,7 @@ def google_translation(lista):
     return lista
 
 def word_counter(texts_list):
-    '''prende la lista di documenti e conta l'occorrenza di ogni parola nei testi'''
+    ''' Counts how many times a word appears in the texts'''
     words_list=[]
     for i in range(len(texts_list)):
         text=texts_list[i]
@@ -568,13 +568,14 @@ def word_counter(texts_list):
     return wordsfreq
 
 def text_vectorizer(texts_list,method,start,end):
-    '''prende i kiid e applica il metodo bag of words restituendo il dataframe 
-    con distribuzione di frequenza delle parole
-    INPUT: lista di testi
-           metodo di vettorizzazione: count o tfidf
-           indice di inizio e indice di fine
-    OUTPUT: matrice di features (parole vettorizzate)
-            lista di parole vettorizzate'''    
+    '''selects kiid and uses bag of words method for word frequency distribution
+    
+    INPUT: texts list
+           stopwords list
+           vectorization method: count or tfidf
+           start and end index
+    OUTPUT: feature matrix (vectorized words)
+            vectorized words list'''    
    
     if(method=='count'):
         vectorizer = CountVectorizer()
@@ -674,16 +675,16 @@ def doc2vec_test_crossval(model,vectorization,classifier, X_train,y_train,alpha_
 
 def doc2vec_get_vectors(model,df,variables_pol,stop_words,anagrafica,alpha_drop):
     
-    '''restituisce i vettori generati dal doc2vec su tutto il dataframe, in base al modello selezionato
-    INPUT: model: modello doc2vec
+    '''Returns vectors generated by doc2vec on the entire dataframe, following the model used
+    INPUT: model:  doc2vec model
            df:dataframe
-           variables:lista di variabili da usare come features
-           testo:variabile di testo usata per la vettorizzazione
-           stopwords:lista di stopwords
-           anagrafica:lista di variabili anagrafiche del df
-           alpha drop: variabile del modello doc2vec che ne prescrive la discesa nell'ottimizzazione
+           variables: feature list to be used lista di variabili da usare come features
+           testo: textual variable for vectorization
+           stopwords: stopwords list
+           anagrafica: list of anagrapic variables
+           alpha drop: variable for doc2vec optimized descent
            
-    OUTPUT: dataframe e variabili da usare come features'''
+    OUTPUT: dataframes and variables to be used as  features'''
     
     
     vectorization = labelize(df[variables_pol], 'all') 
