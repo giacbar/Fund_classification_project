@@ -1,6 +1,8 @@
 # Fund classification project
 ### ML Algorithms for investment fund classification
 
+Research project with the goal of developing a pipeline for the classification of investment funds using machine learning techniques. Using Python and its machine learning libraries (e.g. Sklearn, Pandas) I developed a workflow that includes exploratory analysis, preprocessing, text embedding, feature selection and sensitivity analysis, where I compared the performance of several algorithms using various metrics.
+
 ### Directory and files:
 - `python\dati\new` -> data directory
 - `stopwords.txt` -> stopwords used for text vectorization (in italian and english)
