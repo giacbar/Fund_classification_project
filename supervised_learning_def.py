@@ -576,7 +576,7 @@ def hierarchical_classification(X_train,y_train,X_test,y_test,variables,anagrafi
     variabili_con_indici_train=pd.DataFrame(variabili_con_indici_train,columns=variables+anagrafica)
     variabili_con_indici_test=pd.DataFrame(variabili_con_indici_test,columns=variables+anagrafica)
          
-    '''PRIMO LIVELLO: SUPERCLASSI'''
+    '''FIRST LEVEL: SUPERCLASSI'''
     grid = GridSearchCV(classifier,parameters,cv=5,scoring=scoring,return_train_score=True) # ottimizza i parametri attraverso combinazioni predefinite da un dizionario
     grid.fit(X_train, y_train['super_classe'])
     
@@ -617,7 +617,7 @@ def hierarchical_classification(X_train,y_train,X_test,y_test,variables,anagrafi
     gruppi_superclassi_test=superclassi_test.groupby('super_classe_pred')    
     gruppi_superclassi_test=[gruppi_superclassi_test.get_group(x) for x in gruppi_superclassi_test.groups]
     
-    '''SECONDO LIVELLO: CLASSI'''
+    '''SECOND LEVEL: CLASSI'''
     superclassi_pred=[]
     for i in range(len(gruppi_superclassi_test)):
         superclassi_pred.append(str(gruppi_superclassi_test[i]['super_classe_pred'].iloc[0]))
@@ -722,7 +722,7 @@ def hierarchical_classification(X_train,y_train,X_test,y_test,variables,anagrafi
     gruppi_classi_test=classi_test.groupby('classe_pred')    
     gruppi_classi_test=[gruppi_classi_test.get_group(x) for x in gruppi_classi_test.groups]
 
-    '''TERZO LIVELLO: CATEGORIE'''
+    '''THIRD LEVEL: CATEGORIE'''
     
     classi_pred=[]
     for i in range(len(gruppi_classi_test)):
@@ -818,9 +818,9 @@ def hierarchical_classification(X_train,y_train,X_test,y_test,variables,anagrafi
 
 def multiperiod_classification(lista,anagrafica, classifier):
     
-    """INPUT:-lista di dataframe splittati in base a periodo temporale
-             -lista di variabili anagrafiche dei fondi
-       OUTPUT: -liste di categorie predette e relativi accuracy scores"""
+    """INPUT:- list of dataframes split with respect to period 
+             - list of anagraphic variables
+       OUTPUT: - list of predicted classes and accuracy scores"""
     
     X=[0]*len(lista)
     for i in range(len(lista)):
@@ -828,7 +828,7 @@ def multiperiod_classification(lista,anagrafica, classifier):
         X[i]=pd.DataFrame(X[i].values)
         X[i]=np.array(X[i],dtype=float)
         
-    """lista di labels"""
+    """label list"""
     y=[0]*len(lista)
     for i in range(len(lista)):
         y[i]=lista[i][lista[i].columns[lista[i].columns.isin(anagrafica)]]   
@@ -881,15 +881,15 @@ def multiperiod_classification(lista,anagrafica, classifier):
     return pred_train, train_scores, pred_test, test_scores
 
 def intersection_classification(classifier_algorithm1,classifier_algorithm2,parameters1,parameters2,df,anagrafica,variables1,variables2,label,method,scoring):
-    ''' Metodo di classificazione con intersezione
+    ''' Classification method with intersection
     INPUT:
-        classifier_algorithm1/2 : modelli di classificazione
-        df: dataframe contenente entrambe le tipologie di variabile
-        anagrafica: lista di colonne anagrafica
-        variables1: lista di features primo classificatore
-        variables2: lista di features secondo classificatore
-        label: target classificazione
-        scoring: metodo di valutazione di accuratezza
+        classifier_algorithm1/2 : classification models
+        df: dataframe with both variable types
+        anagrafica: list of anagraphic columns
+        variables1: list of features 1st classifier
+        variables2: list of features 2nd classifier
+        label: classification targer
+        scoring: scoring method
     '''
     print('using {0} score'.format(scoring))
     X_train,y_train,X_test,y_test=prepare_inputs(df,anagrafica,variables1+variables2,label,0.9,'stratified',scaling=False,artificial=False) #split all'interno della funzione
