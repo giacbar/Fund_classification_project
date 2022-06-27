@@ -61,16 +61,16 @@ def data_summary(X_train, y_train, X_test, y_test):
 
 def prepare_inputs(df,anagrafica,variables,label,train_size,shuffle_method,scaling=False,artificial=False):
     
-    '''divide il dataframe in train e test set:
+    '''Splits dataframe in train and test sets:
         INPUT -dataframe
-              -variabili di anagrafica (label, nome, classe..)
-              -variabili da usare per la classificazione
-              -frazione di training set
-              -True: applica l'inputazione delle medie di categoria ai dati mancanti
-              -True: applica la standardizzazione delle variabili
-        OUTPUT: -array di variabili e labels per train e test set'''
+              -anagraphic variables (label, name, class..)
+              -variables for classification
+              -training set fraction
+              -True: applies imputation using class averages to missing data
+              -True: applies feature standardization
+        OUTPUT: - feature array and labels for train and test set'''
     
-    '''divido il dataframe in training (validation a scelta) e test set usando proporzioni a scelta'''
+    '''Split dataframe in training (validation - optional) and test using the chosen proportions'''
    
     if(shuffle_method=='stratified'):
         sss = StratifiedShuffleSplit(n_splits=5, test_size=1-train_size, random_state=1)
@@ -97,7 +97,7 @@ def prepare_inputs(df,anagrafica,variables,label,train_size,shuffle_method,scali
         X_train,y_train=artificial_funds(X_train,y_train,artificial)
 
     if(scaling!=False):
-        '''standardizzazione delle variabili di train e test'''
+        '''feature standardization'''
         scaler=StandardScaler()
         scaler.fit_transform(X_train)
         scaler.transform(X_test)
@@ -118,7 +118,7 @@ def prepare_inputs(df,anagrafica,variables,label,train_size,shuffle_method,scali
     return X_train,y_train,X_test,y_test
 
 def simple_imputation(X_train,y_train,label,variables,anagrafica,classifier,strategy,scoring):
-        '''sostituisco ai NaN presenti nel training set le medie per ciascuna categoria, e laddove non è possibile sostituisco la media di tutti i fondi'''
+        '''Change NaN values in the train set with class averages or the global average where it's not possible'''
        # df_train=pd.concat([y_train,X_train],axis=1)
         X_train=np.matrix(X_train)
         if(strategy=='mean'):  
@@ -146,9 +146,8 @@ def simple_imputation(X_train,y_train,label,variables,anagrafica,classifier,stra
         
 
 def imputation_scores(X_train,y_train,label,classifier,scoring):
-    '''Selezione metodo di imputazione variabili mancanti
-    e confronto score ottenuti
-        '''
+    '''Selection of imputation method and score comparison
+    '''
     #score_simple_imputer = pd.DataFrame()
 
     #for strategy in ('mean', 'median'):
@@ -177,12 +176,12 @@ def imputation_scores(X_train,y_train,label,classifier,scoring):
     print(score_iterative_imputer.mean())
     
 def impute_missing_values(X_train,y_train,variables,label,method):
-    ''' Imputazione delle variabili mancanti
+    ''' Missing values imputation
     INPUT:
         training set
-        method: metodo di imputazione uguale a  imputation_scores
+        method: imputation method
     OUTPUT:
-        Training set con valori imputati
+        training set with no missing values
     '''
     if(method=='mean_by_cate'):
         df_train=pd.concat([y_train,X_train],axis=1)
@@ -218,8 +217,8 @@ def impute_missing_values(X_train,y_train,variables,label,method):
 
 def artificial_funds(X_train,y_train,n_iterations):
     
-    '''aggiungo fondi artificiali al training set simulando la presenza di costi di gestione
-        xk: lista di costi di gestione simulati da togliere e aggiungere'''
+    '''Add artificially created funds to the training set to simulate managment costs
+        xk: list of costs'''
     
     xk=[0.05,0.1]
     pk=[1/len(xk)]*len(xk)
@@ -373,24 +372,24 @@ def sampling_train_PCA_plot(X_train,y_train,variables,label):
     unsupervised.PCA_plot(testdf2,variables,3,label)
     
 def crossvalidation_oversampling_test(classifier,parameters,X_train,y_train,X_test,y_test,label,do_oversampling,oversampler,scoring):
-    '''definisci la pipeline oversampling-modello
+    '''Define oversampling-model pipeline
     INPUT:
-        classifier: modello di classificazione
-        parameters: parametri da ottimizzare
-        Training e Test set
-        do_oversampling: con True fa oversampling dei dati as boolean
-        oversampler: metodologia di oversampling
+        classifier
+        parameters
+        Training and Test sets
+        do_oversampling: True/False
+        oversampler
     OUTPUT:
-        risultato crossvalidation
-        parametri dello stimatore migliori
-        output per generazione report
+        crossvalidation results
+        best estimator parameters
+        output for report generation
     '''
     start_time = time.time()
 
     print('using {0} score'.format(scoring))
     
-    if(scoring=='roc_auc_ovr'): #solo per roc auc score
-        indexes_to_remove=y_train[~y_train[label].isin(y_test[label])][label].index #devo togliere dal training le classi non contenute nel test se no non funziona
+    if(scoring=='roc_auc_ovr'): #only for auc socre
+        indexes_to_remove=y_train[~y_train[label].isin(y_test[label])][label].index #need to remove the classes not included in the test
         X_train=X_train.drop(indexes_to_remove)
         y_train=y_train.drop(indexes_to_remove)
         
@@ -400,8 +399,8 @@ def crossvalidation_oversampling_test(classifier,parameters,X_train,y_train,X_te
     if(do_oversampling==False):
         print('not performing oversampling')
         model=classifier
-        parameters = {key.replace("classifier__", ""): value for key, value in parameters.items()} #per evitare errore nell'ottimizzazione dei parametri con Gridsearch
-    grid = GridSearchCV(model,parameters,scoring=scoring,return_train_score=True,cv=3) # ottimizza i parametri attraverso combinazioni predefinite da un dizionario
+        parameters = {key.replace("classifier__", ""): value for key, value in parameters.items()} #to avoid optimization errors with gridsearch
+    grid = GridSearchCV(model,parameters,scoring=scoring,return_train_score=True,cv=3) # optimize parameters using predefined combinations
     grid.fit(X_train, y_train[label])
     clftest=pd.DataFrame(grid.cv_results_)
     
@@ -450,17 +449,17 @@ def crossvalidation_oversampling_test(classifier,parameters,X_train,y_train,X_te
 
 
 def randomized_crossvalidation_oversampling_test(classifier,parameters,X_train,y_train,X_test,y_test,label,do_oversampling,oversampler,scoring):
-    '''definisci la pipeline oversampling-modello
+    '''Define oversampling-model pipeline
     INPUT:
-        classifier: modello di classificazione
-        parameters: parametri da ottimizzare
-        Training e Test set
-        do_oversampling: con True fa oversampling dei dati as boolean
-        oversampler: metodologia di oversampling
+        classifier
+        parameters
+        Training and Test sets
+        do_oversampling: True/False
+        oversampler
     OUTPUT:
-        risultato crossvalidation
-        parametri dello stimatore migliori
-        output per generazione report
+        crossvalidation results
+        best estimator parameters
+        output for report generation
     '''
     start_time = time.time()
     print('using {0} score'.format(scoring))
@@ -472,7 +471,7 @@ def randomized_crossvalidation_oversampling_test(classifier,parameters,X_train,y
         print('not performing oversampling')
         model=classifier
         parameters = {key.replace("classifier__", ""): value for key, value in parameters.items()}
-    grid = RandomizedSearchCV(model,parameters,scoring=scoring,cv=3,return_train_score=True,n_iter=10,random_state=1) #estrae le serie di parametri casualmente e ottimizza
+    grid = RandomizedSearchCV(model,parameters,scoring=scoring,cv=3,return_train_score=True,n_iter=10,random_state=1) #Extracts the series of parameters and optimizes
     grid.fit(X_train, y_train[label])
     clftest=pd.DataFrame(grid.cv_results_)
     
@@ -499,7 +498,7 @@ def randomized_crossvalidation_oversampling_test(classifier,parameters,X_train,y
 
 
 def output_report(output,true_label,predicted_label):
-    ''' Genera report con matrice di confusione'''
+    ''' Generates report with confusion matrix'''
     report=classification_report(output[true_label],output[predicted_label])
     
     confu = ConfusionMatrix(output[true_label], output[predicted_label])
@@ -522,7 +521,7 @@ def output_report(output,true_label,predicted_label):
     return report,misclassified_entries
 
 def plot_validation_curve(X_train,y_train,classifier,classifer_name,param_range,param_name,scoring):
-    '''plotta le validation curves riferite a un iperparametro a scelta del classifier'''
+    '''Plots the validation curves referring to chosen hyperparameter for the classifier'''
     print('using {0} score'.format(scoring))
 
     train_scores, test_scores = validation_curve(classifier, X_train, y_train, 
