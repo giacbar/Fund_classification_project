@@ -5,11 +5,11 @@ Created on Mon Jan 13 10:03:37 2020
 @author: python
 """
 
-'''Reti neurali'''
+'''Neural networks'''
 from keras.models import Sequential
 from keras.layers import Dense
 
-'''ridefinisco le y per necessità di input'''
+'''Define the data'''
 X_train=np.array(X_train)
 X_test=np.array(X_test)
 
@@ -19,10 +19,10 @@ y_test=np.array(y_test["code"].values)
 y_test=y_test.astype(int)
 k=len(np.unique(y_train))
 
-'''riassunto sui dati'''
+'''Data summary'''
 supervised.data_summary(X_train, y_train, X_test, y_test)   
 
-'''definisco il modello di rete'''
+'''Define the neural network model'''
 model = Sequential([
   #Dense(200, activation='relu'),
 
@@ -33,18 +33,18 @@ model = Sequential([
   Dense(108, activation='softmax')
 ])
 
-'''scelgo i parametri da usare'''
+'''Select the parameters'''
 model.compile(optimizer='Nadam',
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'],init_mode='glorot_uniform',weight_constraint=5)
 
-'''fitto e valuto la mia rete'''
+'''Fit and evaluate the network'''
 model.fit(X_train, y_train,epochs=100,batch_size=10,)
 
 model.evaluate(X_test,  y_test, verbose=2)
 
 
-'''scegliere i migliori parametri per le reti neurali'''
+'''Select the best parameters'''
 
 from keras.wrappers.scikit_learn import KerasClassifier
 # Use scikit-learn to grid search the batch size and epochs
