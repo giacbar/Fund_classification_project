@@ -12,7 +12,7 @@ Created on Wed Sep 18 14:24:11 2019
 @author: fida-stage1
 """
 
-'''In questa parte è necessario il dataframe costruito in data management'''
+'''This part requires the dataframe built in the data management script'''
 
 import os
 import numpy as np
@@ -38,13 +38,13 @@ import unsupervised_learning_def as unsupervised
 import warnings
 warnings.filterwarnings("ignore")
 
-'''0 - metto a posto i dati per la classificazione'''
-'''0.1 - definisco il label da usare per la classificazione: superclasse,classe o categoria e la dimensione del training set'''
+'''0 - Set up the data for classification'''
+'''0.1 - Define label (real life class) to use for classification: superclasse,classe or categoria and the size of the training set'''
 
 label='cat_descrizione'
 train_size=0.9
-df=df_mixed #uso il df_mixed per tutto insieme, poi scelgo le feattures che voglio
-variables=variables_mixed#elenco delle features
+df=df_mixed 
+variables=variables_mixed #features list
 #variables=variables_pol
 #variables=variables_mixed
 
@@ -56,18 +56,16 @@ scoring='accuracy'
 #scoring='roc_auc_ovr_weighted'
 
 
-'''0.2 - divido tra training e test'''
+'''0.2 - Train and test split'''
 X_train_return,y_train,X_test_return,y_test=supervised.prepare_inputs(df,anagrafica,variables_return,label,train_size,'stratified',scaling=False,artificial=False)
 X_train_pol,y_train,X_test_pol,y_test=supervised.prepare_inputs(df,anagrafica,variables_pol,label,train_size,'stratified',scaling=False,artificial=False)
 
 
-'''0.3 - confronto i metodi di imputazione di dati mancanti e scelgo il migliore'''
+'''0.3 - Imputation methods comparison'''
 classifier= supervised.LogisticRegression(C=1000)
 supervised.simple_imputation(X_train_return,y_train,label,variables_return,anagrafica,classifier,'mean',scoring)
 supervised.simple_imputation(X_train_return,y_train,label,variables_return,anagrafica,classifier,'median',scoring)
 #supervised.imputation_scores(X_train_return,y_train,label,classifier,scoring)
-
-'''seleziono il metodo migliore per la gestione dei dati mancanti'''
 
 method='kneighbors'
 
@@ -83,14 +81,14 @@ X_test=X_test_return.join(X_test_pol)
 X_train=np.array(X_train)
 X_test=np.array(X_test)
 
-'''grafico a torta delle classi'''
+'''Class pie chart'''
 
 supervised.pie_plot_classi(y_test)
 
 
 
 
-'''0.4 - verifico il numero di classi'''
+'''0.4 - Verify the number of classes in train and test sets'''
 
 print('numero categorie nel train set:{0}'.format(y_train[label].nunique()))
 print('numero categorie nel test set:{0}'.format(y_test[label].nunique()))
@@ -98,34 +96,34 @@ print('numero categorie nel test set:{0}'.format(y_test[label].nunique()))
 
 
 
-'''0.5 - random guess classifier: assegno ad ogni classe una probabilità pari alla sua frequenza'''
+'''0.5 - Random guess classifier: assign to each class probability equal to its frequency, for benchmarking purposes'''
 
 #supervised.random_guess_classifier(X_train,y_train[label],X_test,y_test[label],'stratified')
-supervised.random_guess_classifier_theoretical(y_train[label],'train') #per avere un benchmark con cui confrontare le performance degli altri modelli
+supervised.random_guess_classifier_theoretical(y_train[label],'train') 
 supervised.random_guess_classifier_theoretical(y_test[label],'test')
 
-'''0.6 - scatter plot PCA dei fondi'''
+'''0.6 - PCA scatter plot of funds'''
 supervised.train_PCA_plot(X_train,y_train[label],variables,'classe')
 
 
 ##############################################################
 
 
-'''ricerca dei parametri ottimali usando la gridsearch
-   1.scegli un dictionary  dei parametri da usare nel modello
-   2.fitti il modello per tutte le combinazioni di parametri, costruendo quindi una griglia nel caso dei parametri categorici, per i parametri numerici uso la bayesian optimization
-   3.scegli i parametri che hanno portato ai risultati migliori in quanto a cross-validation sul training set
-   4.utilizzi tali parametri per il test set
+''' Finding optimal parameters using gridsearch
+   1. Select dictionary of the parameters to use in the model
+   2. Fit the model for all combinations of parameters, building a grid for categorical parameters, bayesian optimization for numerical parameters
+   3. Pick the parameters that returned the best results concerning cross-validation on the training set
+   4. Use the parameters for the test set
 '''
 
 #############################################################
 
 
-'''1 - Regressione logistica'''
+'''1 - Logistic regression'''
 
-'''1.1 - senza penalty'''
+'''1.1 - no penalty'''
 
-'''definisci il tipo di classifier, i suoi parametri da ottimizzare e il tipo di oversampler (opzionale)'''
+'''Define classifier type, its parameters to optimize and the oversampler type (optional)'''
 
 oversampler = supervised.select_oversampler('random',neighbors=2)
 classifier= LogisticRegression(random_state=1)
@@ -148,12 +146,13 @@ param_range =[1,50,100,150,200,500,1000]
 supervised.plot_validation_curve(X_train,y_train[label],classifier,classifier_name,param_range,param_name,scoring)
 
 '''###########cat_descrizione, x=5##### 
+
 #############returns
 
 ###################pol
 
 
-###################pol e return
+###################pol and return
 
 '''############
 
@@ -197,7 +196,7 @@ knn_test,knn_best_estimator,output=supervised.crossvalidation_oversampling_test(
 
 '''6 - Support Vector Machines'''
 
-'''6.1 - prima parte: kernel lineare e poly'''
+'''6.1 - Part 1: linear and polynomial kernel'''
 
 oversampler = supervised.RandomOverSampler(random_state=1)
 #oversampler = supervised.select_oversampler('smote',neighbors=5)
@@ -212,7 +211,7 @@ svm_test,svm_best_estimator,svm_output=supervised.crossvalidation_oversampling_t
 #svm_report,svm_misclassification=supervised.output_report(svm_output)
 
 
-'''6.2 - seconda parte: kernel non lineare'''
+'''6.2 - Part 2: nonlinear kernel'''
 
 #classifier =  SVC(random_state=1,probability=True)
 #parameters={'classifier__kernel':('rbf','sigmoid'),
@@ -320,7 +319,7 @@ supervised.plot_validation_curve(X_train,y_train[label],classifier,classifier_na
 ##############################
 
 
-'''OVERSAMPLING DA FARE SOLO SU TRAINING SET NON VALIDATION'''
+'''OVERSAMPLING'''
 
 neighbors=2
 X_train_oversampled,y_train_oversampled=supervised.oversampler(X_train,y_train['classe'],'smote',neighbors)
@@ -345,11 +344,9 @@ hierarchical_predictions=supervised.hierarchical_classification(X_train,y_train,
 
 
 
-''' 8 - intersection method'''
+''' 8 - Intersection method'''
 
-'''seleziona due set di variabili presenti nel dataframe e due classifier, la funzione applica un classifier per ciascun set di variabili,
-    fa l'intersezione tra i valori predetti e ne valuta l'accuratezza'''
-
+'''Select 2 sets of variables and 2 classifiers, the function applies a classifier for each set and makes the intersection between the results, evaluating the accuracy'''
 
 scoring='accuracy'
 classifier1 =  RandomForestClassifier(random_state=1)
